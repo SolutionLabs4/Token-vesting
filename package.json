@@ -6,7 +6,7 @@
   "scripts": {
     "prettier": "npx prettier --write .",
     "test": "npx hardhat test --logs",
-    "coverage": "npx hardhat coverage --solcoverjs ./.solcover.js",
+    "coverage": "npx hardhat coverage",
     "compile": "npx hardhat compile",
     "flatten": "npx hardhat flatten",
     "check:format": "solhint contracts/*.sol --fix",

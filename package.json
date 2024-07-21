@@ -11,18 +11,15 @@
     "flatten": "npx hardhat flatten",
     "check:format": "solhint contracts/*.sol --fix",
     "deploy:mainnet": "npx hardhat run scripts/deploy.js --network mainnet",
-    "deploy:goerli": "npx hardhat run scripts/deploy.js --network goerli",
     "deploy:bsc:mainnet": "npx hardhat run scripts/deploy.js --network bscMainnet",
-    "deploy:bsc:testnet": "npx hardhat run scripts/deploy.js --network bscTestnet",
-    "tools:surya:graph": "surya graph ./contracts/**/*.sol | dot -Tpng > build/TokenVesting.png",
-    "tools:surya:report": "surya mdreport build/docs/surya-report.md contracts/TokenVesting.sol"
+    "deploy:bsc:testnet": "npx hardhat run scripts/deploy.js --network bscTestnet"
   },
   "files": [
     "build/abi"
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/abdelhamidbakhta/token-vesting-contracts.git"
+    "url": "git+https://github.com/Solution-No-4/Token-vesting.git"
   },
   "keywords": [
     "ERC20",
@@ -34,9 +31,9 @@
   "author": "Abdelhamid Bakhta",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/abdelhamidbakhta/token-vesting-contracts/issues"
+    "url": "https://github.com/Solution-No-4/Token-vesting.git/issues"
   },
-  "homepage": "https://github.com/abdelhamidbakhta/token-vesting-contracts#readme",
+  "homepage": "https://github.com/Solution-No-4/Token-vesting.git#readme",
   "dependencies": {
     "@openzeppelin/contracts": "^4.1.0",
     "prettier": "^2.3.0",

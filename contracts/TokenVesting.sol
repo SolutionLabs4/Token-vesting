@@ -8,34 +8,14 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "./interfaces/ITokenVesting.sol";
 
 /**
  * @title TokenVesting
  */
-contract TokenVesting is Ownable, ReentrancyGuard{
+contract TokenVesting is ITokenVesting, Ownable, ReentrancyGuard{
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
-    struct VestingSchedule{
-        bool initialized;
-        // beneficiary of tokens after they are released
-        address  beneficiary;
-        // cliff period in seconds
-        uint256  cliff;
-        // start time of the vesting period
-        uint256  start;
-        // duration of the vesting period in seconds
-        uint256  duration;
-        // duration of a slice period for the vesting in seconds
-        uint256 slicePeriodSeconds;
-        // whether or not the vesting is revocable
-        bool  revocable;
-        // total amount of tokens to be released at the end of the vesting
-        uint256 amountTotal;
-        // amount of tokens released
-        uint256  released;
-        // whether or not the vesting has been revoked
-        bool revoked;
-    }
 
     // address of the ERC20 token
     IERC20 immutable private _token;
@@ -44,9 +24,6 @@ contract TokenVesting is Ownable, ReentrancyGuard{
     mapping(bytes32 => VestingSchedule) private vestingSchedules;
     uint256 private vestingSchedulesTotalAmount;
     mapping(address => uint256) private holdersVestingCount;
-
-    event Released(uint256 amount);
-    event Revoked();
 
     /**
     * @dev Reverts if no vesting schedule matches the passed identifier.
@@ -79,62 +56,6 @@ contract TokenVesting is Ownable, ReentrancyGuard{
     fallback() external payable {}
 
     /**
-    * @dev Returns the number of vesting schedules associated to a beneficiary.
-    * @return the number of vesting schedules
-    */
-    function getVestingSchedulesCountByBeneficiary(address _beneficiary)
-    external
-    view
-    returns(uint256){
-        return holdersVestingCount[_beneficiary];
-    }
-
-    /**
-    * @dev Returns the vesting schedule id at the given index.
-    * @return the vesting id
-    */
-    function getVestingIdAtIndex(uint256 index)
-    external
-    view
-    returns(bytes32){
-        require(index < getVestingSchedulesCount(), "TokenVesting: index out of bounds");
-        return vestingSchedulesIds[index];
-    }
-
-    /**
-    * @notice Returns the vesting schedule information for a given holder and index.
-    * @return the vesting schedule structure information
-    */
-    function getVestingScheduleByAddressAndIndex(address holder, uint256 index)
-    external
-    view
-    returns(VestingSchedule memory){
-        return getVestingSchedule(computeVestingScheduleIdForAddressAndIndex(holder, index));
-    }
-
-
-    /**
-    * @notice Returns the total amount of vesting schedules.
-    * @return the total amount of vesting schedules
-    */
-    function getVestingSchedulesTotalAmount()
-    external
-    view
-    returns(uint256){
-        return vestingSchedulesTotalAmount;
-    }
-
-    /**
-    * @dev Returns the address of the ERC20 token managed by the vesting contract.
-    */
-    function getToken()
-    external
-    view
-    returns(address){
-        return address(_token);
-    }
-
-    /**
     * @notice Creates a new vesting schedule for a beneficiary.
     * @param _beneficiary address of the beneficiary to whom vested tokens are transferred
     * @param _start start time of the vesting period
@@ -153,7 +74,8 @@ contract TokenVesting is Ownable, ReentrancyGuard{
         bool _revocable,
         uint256 _amount
     )
-        public
+        external 
+        override
         onlyOwner{
         require(
             this.getWithdrawableAmount() >= _amount,
@@ -180,6 +102,66 @@ contract TokenVesting is Ownable, ReentrancyGuard{
         vestingSchedulesIds.push(vestingScheduleId);
         uint256 currentVestingCount = holdersVestingCount[_beneficiary];
         holdersVestingCount[_beneficiary] = currentVestingCount.add(1);
+    }
+
+    /**
+    * @dev Returns the number of vesting schedules associated to a beneficiary.
+    * @return the number of vesting schedules
+    */
+    function getVestingSchedulesCountByBeneficiary(address _beneficiary)
+    external
+    view
+    override
+    returns(uint256){
+        return holdersVestingCount[_beneficiary];
+    }
+
+    /**
+    * @dev Returns the vesting schedule id at the given index.
+    * @return the vesting id
+    */
+    function getVestingIdAtIndex(uint256 index)
+    external
+    view
+    returns(bytes32){
+        require(index < getVestingSchedulesCount(), "TokenVesting: index out of bounds");
+        return vestingSchedulesIds[index];
+    }
+
+    /**
+    * @notice Returns the vesting schedule information for a given holder and index.
+    * @return the vesting schedule structure information
+    */
+    function getVestingScheduleByAddressAndIndex(address holder, uint256 index)
+    external
+    view
+    override
+    returns(VestingSchedule memory){
+        return getVestingSchedule(computeVestingScheduleIdForAddressAndIndex(holder, index));
+    }
+
+
+    /**
+    * @notice Returns the total amount of vesting schedules.
+    * @return the total amount of vesting schedules
+    */
+    function getVestingSchedulesTotalAmount()
+    external
+    view
+    returns(uint256){
+        return vestingSchedulesTotalAmount;
+    }
+
+
+    /**
+    * @dev Returns the address of the ERC20 token managed by the vesting contract.
+    */
+    function getToken()
+    external
+    override
+    view
+    returns(address){
+        return address(_token);
     }
 
     /**
